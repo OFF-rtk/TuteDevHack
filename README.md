@@ -6,12 +6,14 @@ Welcome to the team! This guide will help you get started, even if you're new to
 
 ## 📁 Project Structure
 
+```
 /hackathon-project
 ├── frontend/ → Next.js + TypeScript + TailwindCSS(Frontend)
 ├── backend/ → Node.js + Express.js (Backend)
 ├── ai/ → Python for AI/ML (Inference, Models, etc.)
 ├── README.md → This file!
 └── .gitignore → Files/folders to ignore in Git
+```
 
 ---
 
@@ -21,11 +23,11 @@ We follow a Git branching model where each team member works in their own featur
 
 | Branch Name          | Purpose                    | Assigned To            |
 |----------------------|----------------------------|------------------------|
-| `feature/frontendH`  | Frontend Dev 1 features    | Frontend Teammate 1    |
-| `feature/frontendS`  | Frontend Dev 2 features    | Frontend Teammate 2    |
+| `feature/frontendH`  | Frontend Dev H features    | Frontend Teammate H    |
+| `feature/frontendS`  | Frontend Dev S features    | Frontend Teammate S    |
 | `feature/backendP`   | Backend APIs and logic     | Backend Teammate       |
-| `feature/aiR`        | AI/ML development          | AI Engineer (You)      |
-| `develop`            | Merged & tested features   | You (Integrator)       |
+| `feature/aiR`        | AI/ML development          | AI Engineer            |
+| `develop`            | Merged & tested features   | Integrator             |
 | `main`               | Final release-ready code   | Everyone!              |
 
 ✅ Branches are only merged into `develop` first → then into `main` once everything is tested.
@@ -52,7 +54,7 @@ cd TuteDevHack
 ```bash
 
 git fetch
-git checkout <your-branch-name>
+git checkout feature/<your-branch-name>
 
 ```
 (Replace `<your-branch-name>` with your assigned one)
@@ -72,7 +74,7 @@ git checkout <your-branch-name>
 
     git add .
     git commit -m "🛠️ Describe what you did"
-    git push origin <your-branch-name>
+    git push origin feature/<your-branch-name>
 
     ```
 
