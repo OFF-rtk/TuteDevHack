@@ -8,7 +8,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',      // ✅ HTTP for local development
-      'https://*.vercel.app',       // ✅ HTTPS for all Vercel deployments
+      'https://*.vercel.app',
+      'https://tute-dev-hack.vercel.app',      // ✅ HTTPS for all Vercel deployments
     ],
     credentials: true,
   });
