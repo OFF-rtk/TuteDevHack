@@ -1,58 +1,90 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppStore } from '@/stores/appStores';
-import  Button  from '@/components/ui/Button';
-import  Input  from '@/components/ui/Input';
+import WelcomeAnimation from '@/components/features/WelcomeAnimation';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
-export default function CreateGroupBuyPage() {
-    const { showAlert } = useAppStore();
-    const router = useRouter();
-    const [selectedProductId, setSelectedProductId] = useState('');
+// --- Supplier Dashboard Page ---
+export default function SupplierDashboard() {
+  const { currentUser, supplierAnalytics, myGroupBuys, isLoading, error } = useAppStore();
 
-    // Dummy product list for the select dropdown
-    const products = [
-      { id: '9ae3f86a-9b92-45e5-85e6-c4801f5b3eed', name: 'Onions' },
-      { id: '1b2c3d4e-5f67-89ab-cdef-0123456789ab', name: 'Tomatoes' }
-    ];
+  if (isLoading && !supplierAnalytics) {
+    return <div className="text-center p-10">Loading dashboard...</div>;
+  }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // In a real app, you would send this data to your backend API
-        showAlert('Success!', 'Your new group buy has been created.', () => {
-            router.push('/supplier/dashboard');
-        });
-    };
+  if (error) {
+    return <div className="text-center p-10 text-red-500">Error: {error}</div>;
+  }
 
-    return (
-        <div className="p-4 sm:p-6 pb-24 bg-gray-50">
-            <Link href="/supplier/dashboard" className="text-green-600 font-semibold mb-6 flex items-center">&larr; Back to Dashboard</Link>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6" style={{ fontFamily: "'Poppins', sans-serif" }}>Create a New Group Buy</h2>
-            
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-lg space-y-6">
-                <div>
-                    <label htmlFor="product_id" className="block text-sm font-medium text-gray-700 mb-1">Product</label>
-                    <select 
-                        id="product_id" 
-                        required
-                        value={selectedProductId}
-                        onChange={(e) => setSelectedProductId(e.target.value)}
-                        className="mt-1 block w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-base text-black"
-                    >
-                        <option value="">-- Select a product --</option>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                </div>
-<div className='focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent'>
-                <Input id="title"  className='focus:outline-none focus:ring-2 focus:ring-green focus:border-transparent' label="Group Buy Title (Optional)" type="text" placeholder="e.g., Bulk Onions for August" /></div>
-                <Input id="end_date" label="End Date" type="datetime-local" required />
-                <Input id="target_quantity" label="Target Quantity (Optional)" type="number" placeholder="100" />
-                <Input id="area_name" label="Delivery Area" type="text" required placeholder="e.g., Nashik region" />
-                <Input id="price_per_unit" label="Price Per Unit (₹)" type="number" step="0.01" required placeholder="40.5" />
+  if (!currentUser) return null; // Layout handles redirect
 
-                <Button type="submit" variant="secondary">Create Group Buy</Button>
-            </form>
+  // Safely calculate analytics values
+  const activeGroupBuysCount = supplierAnalytics?.recent_group_buys?.filter(gb => gb.status === 'ACTIVE').length ?? 0;
+  const estimatedRevenue = (supplierAnalytics?.total_ordered_quantity ?? 0) * 20;
+
+  return (
+    <div className="bg-gray-50">
+      <WelcomeAnimation userName={currentUser.full_name || 'Supplier'} />
+      <div className="p-4 sm:p-6 pb-24 -mt-24 relative z-20">
+        {/* Analytics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-500 text-sm font-medium">Total Group Buys</h3>
+            <p className="text-3xl font-bold text-gray-900">{supplierAnalytics?.total_group_buys ?? 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-500 text-sm font-medium">Active Group Buys</h3>
+            <p className="text-3xl font-bold text-green-600">{activeGroupBuysCount}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-500 text-sm font-medium">Units Ordered</h3>
+            <p className="text-3xl font-bold text-gray-900">{supplierAnalytics?.total_ordered_quantity ?? 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow-md">
+            <h3 className="text-gray-500 text-sm font-medium">Est. Revenue</h3>
+            <p className="text-3xl font-bold text-gray-900">₹{estimatedRevenue}</p>
+          </div>
         </div>
-    );
-}
+
+        {/* Actions & Group Buy List */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">Your Recent Group Buys</h2>
+          {/* UPDATED: Added a container for action buttons */}
+          <div className="flex items-center gap-2">
+            <Link 
+              href="/supplier/products" 
+              className="w-auto px-4 py-2 text-sm font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-md focus:outline-none focus:ring-4 rounded-lg flex items-center justify-center bg-gray-700 text-white hover:bg-gray-800 focus:ring-gray-300"
+            >
+              Add Product
+            </Link>
+            <Link 
+              href="/supplier/group/create" 
+              className="w-auto px-4 py-2 text-sm font-semibold shadow-md transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-md focus:outline-none focus:ring-4 rounded-lg flex items-center justify-center bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-300"
+            >
+              Create Group Buy
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-4">
+          {myGroupBuys.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">You haven't created any group buys yet.</p>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {myGroupBuys.map(item => (
+                <div key={item.id} className="py-3 flex justify-between items-center">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{item.products.name}</h3>
+                    <p className="text-sm text-gray-500">{item.current_quantity} / {item.target_quantity} kg filled.</p>
+                  </div>
+                  <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full', item.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')}>{item.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
