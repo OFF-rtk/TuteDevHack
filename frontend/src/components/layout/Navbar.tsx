@@ -1,9 +1,9 @@
 'use client';
-import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import React from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import  Logo  from '@/components/ui/Logo';
+import { Logo } from '../ui/Logo';
+import { Button } from '../ui/Button';
 import { User } from '@/lib/types';
 
 interface NavbarProps {
@@ -12,100 +12,87 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ user, handleLogout }) => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const router = useRouter();
     const pathname = usePathname();
-    const userInitial = user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase();
+    
+    const isVendor = user.role === 'VENDOR';
+    const dashboardPath = isVendor ? '/dashboard' : '/supplier/dashboard';
 
-    const navLinks = user.role === 'VENDOR' ? [
+    const navLinks = isVendor ? [
         { label: 'Dashboard', href: '/dashboard' },
         { label: 'Products', href: '/products' },
         { label: 'My Orders', href: '/my-orders' },
     ] : [
-        { label: 'Dashboard', href: '/supplier-dashboard' },
+        { label: 'Dashboard', href: '/supplier/dashboard' },
+        { label: 'Create Group Buy', href: '/supplier/group/create' },
     ];
 
     return (
-        <nav className="bg-white/90 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-30">
+        <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 sticky top-0 z-40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center">
-                        <Logo />
-                    </div>
-                    <div className="flex items-center">
-                        <div className="hidden md:block">
-                            <div className="ml-10 flex items-baseline space-x-1">
-                                {navLinks.map(link => (
-                                    <Link 
-                                        key={link.href} 
-                                        href={link.href} 
-                                        className={cn(
-                                            'px-3 py-2 rounded-md text-sm font-medium transition-colors', 
-                                            pathname === link.href 
-                                                ? 'bg-orange-100 text-orange-600' 
-                                                : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'
-                                        )}
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="hidden md:block ml-4 relative">
-                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                {userInitial}
-                            </button>
-                            {isMenuOpen && (
-                                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-40">
-                                    <div className="px-4 py-3">
-                                        <p className="text-sm text-gray-700 font-semibold truncate">{user.full_name || user.email}</p>
-                                        <p className="text-xs text-gray-500">{user.role}</p>
-                                    </div>
-                                    <div className="border-t border-gray-100"></div>
-                                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
-                                </div>
-                            )}
-                        </div>
-                        <div className="md:hidden">
-                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={!isMenuOpen ? "M4 6h16M4 12h16M4 18h16" : "M6 18L18 6M6 6l12 12"} /></svg>
-                            </button>
-                        </div>
+                <div className="flex justify-between items-center h-16">
+                    <Logo size="sm" />
+
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm text-[#6B7280] hidden sm:block">
+                            Welcome, {user.full_name || user.email}
+                        </span>
+                        <Button variant="ghost" onClick={handleLogout} size="sm">
+                            Logout
+                        </Button>
                     </div>
                 </div>
             </div>
-            {isMenuOpen && (
-                <div className="md:hidden">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+
+            {/* Mobile/Desktop Navigation */}
+            <div className="bg-white/60 backdrop-blur-sm border-t border-gray-200/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex space-x-8 overflow-x-auto py-3">
                         {navLinks.map(link => (
-                             <Link 
-                                key={link.href} 
-                                href={link.href}
-                                onClick={() => setIsMenuOpen(false)}
-                                className={cn(
-                                    'block px-3 py-2 rounded-md text-base font-medium', 
-                                    pathname === link.href 
-                                        ? 'bg-orange-100 text-orange-600' 
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                )}
-                            >
-                                {link.label}
-                            </Link>
+                            <NavLink 
+                                key={link.href}
+                                href={link.href} 
+                                label={link.label} 
+                                isVendor={isVendor}
+                                isActive={pathname === link.href}
+                                onClick={() => router.push(link.href)}
+                            />
                         ))}
                     </div>
-                    <div className="pt-4 pb-3 border-t border-gray-200">
-                        <div className="flex items-center px-5">
-                            <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-lg">{userInitial}</div>
-                            <div className="ml-3">
-                                <div className="text-base font-medium text-gray-800">{user.full_name || user.email}</div>
-                                <div className="text-sm font-medium text-gray-500">{user.role}</div>
-                            </div>
-                        </div>
-                        <div className="mt-3 px-2 space-y-1">
-                            <button onClick={handleLogout} className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50">Logout</button>
-                        </div>
-                    </div>
                 </div>
-            )}
+            </div>
         </nav>
     );
 };
+
+interface NavLinkProps {
+    href: string;
+    label: string;
+    isVendor: boolean;
+    isActive: boolean;
+    onClick: () => void;
+}
+
+function NavLink({ href, label, isVendor, isActive, onClick }: NavLinkProps) {
+    const hoverColor = isVendor
+        ? "hover:text-[#FF6B35] hover:border-[#FF6B35]"
+        : "hover:text-[#4A7C59] hover:border-[#4A7C59]";
+    
+    const activeColor = isVendor
+        ? "text-[#FF6B35] border-[#FF6B35]"
+        : "text-[#4A7C59] border-[#4A7C59]";
+
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                "whitespace-nowrap py-2 px-1 text-sm font-medium transition-colors border-b-2",
+                isActive 
+                    ? `${activeColor}` 
+                    : `text-[#6B7280] border-transparent ${hoverColor}`
+            )}
+        >
+            {label}
+        </button>
+    );
+}

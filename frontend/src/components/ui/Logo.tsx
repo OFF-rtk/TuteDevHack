@@ -1,19 +1,76 @@
-// src/components/ui/Logo.tsx
-import React from 'react';
-import { cn } from '../../lib/utils';
+interface LogoProps {
+  className?: string
+  showText?: boolean
+  size?: "sm" | "md" | "lg"
+}
 
-const Logo: React.FC<{ className?: string }> = ({ className }) => (
-    <div className={cn("flex items-center space-x-2", className)}>
-        <svg className="w-8 h-8 text-orange-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.5 9.5C17.5 11.433 15.933 13 14 13C12.067 13 10.5 11.433 10.5 9.5C10.5 7.567 12.067 6 14 6C15.933 6 17.5 7.567 17.5 9.5Z" fill="#FDBA74"/>
-            <path d="M9.5 9.5C9.5 11.433 7.933 13 6 13C4.067 13 2.5 11.433 2.5 9.5C2.5 7.567 4.067 6 6 6C7.933 6 9.5 7.567 9.5 9.5Z" fill="#FDBA74"/>
-            <path d="M19.9829 14.7821C20.2084 15.343 19.8824 15.9823 19.3215 16.2078L13.9997 18.2078C13.4388 18.4333 12.7995 18.1073 12.574 17.5464C12.3485 16.9855 12.6745 16.3462 13.2354 16.1207L18.5572 14.1207C19.1181 13.8952 19.7574 14.2212 19.9829 14.7821Z" fill="#4ADE80"/>
-            <path d="M4.01707 14.7821C3.79159 15.343 4.11763 15.9823 4.67854 16.2078L10.0003 18.2078C10.5612 18.4333 11.2005 18.1073 11.426 17.5464C11.6515 16.9855 11.3255 16.3462 10.7646 16.1207L5.44278 14.1207C4.88187 13.8952 4.24255 14.2212 4.01707 14.7821Z" fill="#4ADE80"/>
+export function Logo({ className = "", showText = true, size = "md" }: LogoProps) {
+  const sizes = {
+    sm: "w-8 h-8",
+    md: "w-12 h-12",
+    lg: "w-16 h-16",
+  }
+
+  const textSizes = {
+    sm: "text-lg",
+    md: "text-2xl",
+    lg: "text-3xl",
+  }
+
+  return (
+    <div className={`flex items-center gap-3 ${className}`}>
+      <div className={`relative ${sizes[size]}`}>
+        <svg viewBox="0 0 60 60" className="w-full h-full">
+          {/* Cart base */}
+          <rect x="8" y="35" width="44" height="12" fill="#FF6B35" rx="2" />
+
+          {/* Cart counter */}
+          <rect x="12" y="28" width="36" height="10" fill="#D97706" rx="1" />
+
+          {/* Awning support */}
+          <rect x="28" y="15" width="4" height="15" fill="#8B4513" />
+
+          {/* Awning */}
+          <path d="M5 20 L55 20 L52 12 L8 12 Z" fill="#4A7C59" />
+
+          {/* Awning stripes */}
+          <path
+            d="M12 12 L12 20 M20 12 L20 20 M28 12 L28 20 M36 12 L36 20 M44 12 L44 20"
+            stroke="#2D5016"
+            strokeWidth="2"
+          />
+
+          {/* Scalloped edge */}
+          <path
+            d="M8 20 Q12 24 16 20 T24 20 T32 20 T40 20 T48 20 L52 20"
+            stroke="#2D5016"
+            strokeWidth="1.5"
+            fill="none"
+          />
+
+          {/* Food items */}
+          <circle cx="20" cy="32" r="2.5" fill="#FCD34D" />
+          <circle cx="30" cy="32" r="2.5" fill="#F87171" />
+          <circle cx="40" cy="32" r="2.5" fill="#34D399" />
+
+          {/* Wheels */}
+          <circle cx="18" cy="47" r="6" fill="#059669" stroke="#065F46" strokeWidth="2" />
+          <circle cx="42" cy="47" r="6" fill="#059669" stroke="#065F46" strokeWidth="2" />
+
+          {/* Wheel spokes */}
+          <path d="M18 41 L18 53 M12 47 L24 47" stroke="#065F46" strokeWidth="1.5" />
+          <path d="M42 41 L42 53 M36 47 L48 47" stroke="#065F46" strokeWidth="1.5" />
+
+          {/* Handle */}
+          <rect x="4" y="30" width="8" height="3" fill="#8B4513" rx="1" />
         </svg>
-        <div className="text-xl font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <span className="text-orange-600">M</span><span className="text-zinc-800">andipur</span>
-        </div>
+      </div>
+      {showText && (
+        <span className={`font-poppins font-bold ${textSizes[size]}`}>
+          <span className="text-[#FF6B35]">M</span>
+          <span className="text-[#1F2937]">andipur</span>
+        </span>
+      )}
     </div>
-);
-
-export default Logo;
+  )
+}

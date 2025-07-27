@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useAppStore } from '@/stores/appStores';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAppStore } from '@/stores/appStores';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { CreateGroupBuyDto } from '@/lib/types';
 
 export default function CreateGroupBuyPage() {
@@ -12,30 +11,36 @@ export default function CreateGroupBuyPage() {
     myProducts, 
     fetchMyProducts, 
     createGroupBuy, 
-    isLoading 
+    isLoading,
+    currentUser,
+    openAlertModal
   } = useAppStore();
   const router = useRouter();
 
-  // Form state
+  // Form state matching your CreateGroupBuyDto
   const [formData, setFormData] = useState<Partial<CreateGroupBuyDto>>({
     product_id: '',
+    title: '',
+    end_date: '',
+    target_quantity: 100,
     area_name: '',
     price_per_unit: 0,
-    target_quantity: 100,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch the supplier's products when the component mounts
   useEffect(() => {
-    fetchMyProducts();
-  }, [fetchMyProducts]);
+    if (currentUser) {
+      fetchMyProducts();
+    }
+  }, [currentUser, fetchMyProducts]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [id]: id === 'price_per_unit' || id === 'target_quantity' ? Number(value) : value,
+      [name]: name === 'price_per_unit' || name === 'target_quantity' ? Number(value) : value,
     }));
   };
 
@@ -51,8 +56,8 @@ export default function CreateGroupBuyPage() {
     setIsSubmitting(true);
     try {
       await createGroupBuy(formData as CreateGroupBuyDto);
-      alert('Success! Your new group buy has been created.');
-      router.push('/supplier/dashboard'); // Redirect after success
+      openAlertModal('Success', 'Group buy created successfully!');
+      router.push('/supplier/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to create group buy.');
     } finally {
@@ -60,39 +65,156 @@ export default function CreateGroupBuyPage() {
     }
   };
 
+  // Set minimum date to tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDateTime = tomorrow.toISOString().slice(0, 16); // Format for datetime-local
+
   return (
-    <div className="p-4 sm:p-6 pb-24 bg-gray-50">
-      <Link href="/supplier/dashboard" className="text-orange-600 font-semibold mb-6 flex items-center">&larr; Back to Dashboard</Link>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6" style={{ fontFamily: "'Poppins', sans-serif" }}>Create a New Group Buy</h2>
-      
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-lg space-y-6 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#F5F1E8]">
+      <div className="max-w-2xl mx-auto space-y-6 p-6">
         <div>
-          <label htmlFor="product_id" className="block text-sm font-medium text-gray-700 mb-1">Product</label>
-          {isLoading && myProducts.length === 0 ? <p>Loading your products...</p> : (
-            <select 
-              id="product_id" 
-              required
-              value={formData.product_id}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base text-black"
-            >
-              <option value="">-- Select a product --</option>
-              {myProducts.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          )}
+          <h1 className="text-2xl font-poppins font-bold text-[#1F2937] mb-2">
+            Create New Group Buy
+          </h1>
+          <p className="text-[#6B7280]">
+            Set up a new group buying opportunity for vendors
+          </p>
         </div>
 
-        <Input id="end_date" label="End Date" type="datetime-local" required onChange={handleInputChange} />
-        <Input id="target_quantity" label="Target Quantity (kg)" type="number" placeholder="100" value={formData.target_quantity} onChange={handleInputChange} />
-        <Input id="area_name" label="Delivery Area" type="text" required placeholder="e.g., Mhow Gaon" value={formData.area_name} onChange={handleInputChange} />
-        <Input id="price_per_unit" label="Price Per Unit (₹ per kg)" type="number" step="0.01" required placeholder="40.5" value={formData.price_per_unit} onChange={handleInputChange} />
+        <div className="bg-white rounded-2xl shadow-lg p-8 warm-shadow">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Product Selection */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Product
+              </label>
+              {isLoading && myProducts.length === 0 ? (
+                <p className="text-[#6B7280]">Loading your products...</p>
+              ) : (
+                <select
+                  name="product_id"
+                  value={formData.product_id}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937]"
+                  required
+                >
+                  <option value="" className="text-[#6B7280]">Select a product</option>
+                  {myProducts.map((product) => (
+                    <option key={product.id} value={product.id} className="text-[#1F2937]">
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+            {/* End Date */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                End Date
+              </label>
+              <input
+                name="end_date"
+                type="datetime-local"
+                value={formData.end_date || ''}
+                onChange={handleInputChange}
+                min={minDateTime}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937]"
+                required
+              />
+            </div>
 
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Group Buy'}
-        </Button>
-      </form>
+            {/* Target Quantity */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Target Quantity (units)
+              </label>
+              <input
+                name="target_quantity"
+                type="number"
+                value={formData.target_quantity || ''}
+                onChange={handleInputChange}
+                min="1"
+                placeholder="e.g., 100"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#6B7280]"
+                required
+              />
+            </div>
+
+            {/* Area */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Delivery Area
+              </label>
+              <input
+                name="area_name"
+                type="text"
+                value={formData.area_name || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., Mhow Gaon"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#6B7280]"
+                required
+              />
+            </div>
+
+            {/* Price per Unit */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Price per Unit (₹)
+              </label>
+              <input
+                name="price_per_unit"
+                type="number"
+                step="0.01"
+                value={formData.price_per_unit || ''}
+                onChange={handleInputChange}
+                min="0"
+                placeholder="e.g., 25.00"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#6B7280]"
+                required
+              />
+            </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  {error}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6">
+              <button
+                type="button" 
+                onClick={() => router.back()} 
+                className="flex-1 py-3 px-4 text-center rounded-lg transition-all duration-200 font-medium text-[#6B7280] hover:text-[#1F2937] hover:bg-gray-100 border border-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit" 
+                disabled={isSubmitting}
+                className="flex-1 py-3 px-4 text-center rounded-lg transition-all duration-200 font-medium bg-[#4A7C59] text-white hover:bg-[#3D6B4A] focus:outline-none focus:ring-2 focus:ring-[#4A7C59] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  'Create Group Buy'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

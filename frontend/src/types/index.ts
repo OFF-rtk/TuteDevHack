@@ -3,34 +3,46 @@
 export type Role = 'VENDOR' | 'SUPPLIER';
 
 export interface Product {
+    id: string;
     name: string;
     description: string;
     image_url: string;
-    unit: string;
-    search_keywords: string[];
+    search_keywords: string;
+    supplier_id: string;
+    created_at: string;
 }
 
-export interface GroupBuy {
+export interface EnrichedGroupBuy {
     id: string;
     supplier_id: string;
-    product: Product;
+    product_id: string;
     target_quantity: number;
     current_quantity: number;
     price_per_unit: number;
     status: 'ACTIVE' | 'INACTIVE';
     end_date: string;
-    participants: number;
+    area_name: string;
+    created_at: string;
+    
+    // Enriched relations from your database
+    product?: Product;
+    profiles?: {
+        full_name: string;
+        area_name: string;
+        role: Role;
+    };
 }
 
-export interface MyOrder {
+export interface EnrichedOrder {
     id: string;
     group_buy_id: string;
-    product_name: string;
+    vendor_id: string;
     quantity: number;
-    unit: string;
-    status: 'PENDING' | 'PAID' | 'DELIVERED';
-    delivery_details: string | null;
-    createdAt: string; // ISO string for the order creation time
+    status: 'PLACED' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
+    created_at: string;
+    
+    // Enriched relations
+    group_buy?: EnrichedGroupBuy;
 }
 
 export interface User {
@@ -38,12 +50,33 @@ export interface User {
     full_name?: string;
     email: string;
     role: Role;
-    area_locality: string;
+    area_name: string;  // Changed from area_locality
+    created_at: string;
 }
 
-export interface AppData {
-    group_buys: GroupBuy[];
-    my_orders: MyOrder[];
-    users: Record<string, User>; // Using a record for easier user lookup
-    suppliers: Record<string, { name: string }>;
+// DTOs for API calls
+export interface CreateProductDto {
+    name: string;
+    description: string;
+    image_url: string;
+    search_keywords: string;
+}
+
+export interface CreateGroupBuyDto {
+    product_id: string;
+    target_quantity: number;
+    price_per_unit: number;
+    end_date: string;
+}
+
+export interface PlaceOrderDto {
+    group_buy_id: string;
+    quantity: number;
+}
+
+export interface SupplierAnalytics {
+    total_products: number;
+    active_group_buys: number;
+    total_orders: number;
+    total_revenue: number;
 }

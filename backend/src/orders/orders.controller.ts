@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, InternalServerErrorException, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/jwt/jwt.guard';
 import { OrdersService, ParsedOrder } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -55,6 +55,31 @@ export class OrdersController {
       return { orders }
     } catch(error) {
       throw new InternalServerErrorException(error.message || 'Failed to fetch orders');
+    }
+  }
+
+  @Delete(':id')
+  async cancelOrder(
+    @Req() req: Request,
+    @Param('id') orderId: string,
+  ) {
+    if (!req.user) {
+      throw new BadRequestException('User not found on request.');
+    }
+
+    const vendorId = req.user.id;
+
+    if (!orderId) {
+      throw new BadRequestException('User not found on request')
+    }
+
+    try {
+      return await this.ordersService.cancelOrder(vendorId, orderId)
+    } catch (error) {
+      if(error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(error.message || 'Failed to cancel order');
     }
   }
 }

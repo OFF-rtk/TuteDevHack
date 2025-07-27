@@ -30,17 +30,27 @@ interface AppState {
   // UI State
   isLoading: boolean;
   error: string | null;
-  confirmModalState: { isOpen: boolean; title: string; message: string; onConfirm: () => void; };
   
-  // --- ACTIONS ---
+  // Updated modal states to match the styled store
+  alertModal: { isOpen: boolean; title: string; message: string; };
+  confirmModal: { isOpen: boolean; title: string; message: string; onConfirm: () => void; };
+  quantityModal: { isOpen: boolean; groupBuy: EnrichedGroupBuy | null; };
+}
+
+// --- ACTIONS ---
+interface AppActions {
   // Auth
   setSession: (session: Session | null) => void;
   setCurrentUser: (user: User | null) => void;
   logout: () => Promise<void>;
   
-  // UI Actions
-  showConfirm: (title: string, message: string, onConfirm: () => void) => void;
-  hideConfirm: () => void;
+  // Updated UI Actions to match the styled store
+  openAlertModal: (title: string, message: string) => void;
+  closeAlertModal: () => void;
+  openConfirmModal: (title: string, message: string, onConfirm: () => void) => void;
+  closeConfirmModal: () => void;
+  openQuantityModal: (groupBuy: EnrichedGroupBuy) => void;
+  closeQuantityModal: () => void;
 
   // Vendor Actions
   fetchGroupBuys: () => Promise<void>;
@@ -62,9 +72,9 @@ interface AppState {
 }
 
 // --- The Full-Featured Store ---
-export const useAppStore = create<AppState>()(
+export const useAppStore = create<AppState & AppActions>()(
   persist(
-    (set, get): AppState => ({
+    (set, get) => ({
       // --- Default State ---
       session: null,
       currentUser: null,
@@ -75,7 +85,11 @@ export const useAppStore = create<AppState>()(
       supplierAnalytics: null,
       isLoading: false,
       error: null,
-      confirmModalState: { isOpen: false, title: '', message: '', onConfirm: () => {} },
+      
+      // Updated modal state defaults to match styled store
+      alertModal: { isOpen: false, title: '', message: '' },
+      confirmModal: { isOpen: false, title: '', message: '', onConfirm: () => {} },
+      quantityModal: { isOpen: false, groupBuy: null },
 
       // --- AUTH ACTIONS ---
       setSession: (session) => set({ session }),
@@ -93,14 +107,30 @@ export const useAppStore = create<AppState>()(
         });
       },
 
-      // --- UI ACTIONS ---
-      showConfirm: (title, message, onConfirm) => set({
-        confirmModalState: { isOpen: true, title, message, onConfirm: () => {
-          get().hideConfirm();
-          onConfirm();
-        }}
-      }),
-      hideConfirm: () => set(state => ({ confirmModalState: { ...state.confirmModalState, isOpen: false } })),
+      // --- UPDATED UI ACTIONS (matching styled store) ---
+      openAlertModal: (title: string, message: string) => {
+        set({ alertModal: { isOpen: true, title, message } });
+      },
+      
+      closeAlertModal: () => {
+        set({ alertModal: { isOpen: false, title: '', message: '' } });
+      },
+      
+      openConfirmModal: (title: string, message: string, onConfirm: () => void) => {
+        set({ confirmModal: { isOpen: true, title, message, onConfirm } });
+      },
+      
+      closeConfirmModal: () => {
+        set({ confirmModal: { isOpen: false, title: '', message: '', onConfirm: () => {} } });
+      },
+      
+      openQuantityModal: (groupBuy: EnrichedGroupBuy) => {
+        set({ quantityModal: { isOpen: true, groupBuy } });
+      },
+      
+      closeQuantityModal: () => {
+        set({ quantityModal: { isOpen: false, groupBuy: null } });
+      },
 
       // --- VENDOR ACTIONS ---
       fetchGroupBuys: async () => {

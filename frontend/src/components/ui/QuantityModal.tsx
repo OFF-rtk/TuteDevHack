@@ -1,54 +1,131 @@
-// src/components/ui/QuantityModal.tsx
-import React, { useState, useEffect } from 'react';
-import { GroupBuy } from '../../types';
-import Button from './Button';
+"use client"
 
-interface QuantityModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: (quantity: number) => void;
-    groupBuy: GroupBuy | null;
-}
+import type React from "react"
+import { useState } from "react"
+import { useAppStore } from "@/stores/appStores"
+import { Button } from "./Button"
+import { Input } from "./Input"
+import { formatCurrency } from "../../lib/utils"
 
-const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, onConfirm, groupBuy }) => {
-    const [quantity, setQuantity] = useState(1);
+export function QuantityModal() {
+  const { 
+    quantityModal, 
+    closeQuantityModal, 
+    placeClickOrder, 
+    currentUser, 
+    openAlertModal,
+    isLoading 
+  } = useAppStore()
+  
+  const [quantity, setQuantity] = useState(1)
 
-    useEffect(() => {
-        if (isOpen) {
-            setQuantity(1); // Reset quantity when modal opens
-        }
-    }, [isOpen]);
+  if (!quantityModal.isOpen || !quantityModal.groupBuy) return null
 
-    if (!isOpen || !groupBuy) return null;
+  const { groupBuy } = quantityModal
+  const totalAmount = quantity * groupBuy.price_per_unit
+  const maxQuantity = groupBuy.target_quantity - groupBuy.current_quantity
 
-    const handleConfirm = () => {
-        if (quantity > 0) {
-            onConfirm(quantity);
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl transform transition-all scale-100">
-                <h3 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>Enter Quantity</h3>
-                <p className="text-gray-600 mb-6">How much {groupBuy.product.name} would you like to order?</p>
-                <div className="flex items-center justify-center space-x-4 mb-6">
-                    <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24 text-center text-black px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                        min="1"
-                    />
-                    <span className="text-lg text-gray-700 font-medium">{groupBuy.product.unit}</span>
-                </div>
-                <div className="flex space-x-4">
-                    <Button onClick={onClose} className="bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-300">Cancel</Button>
-                    <Button onClick={handleConfirm}>Confirm Order</Button>
-                </div>
-            </div>
+    if (!currentUser) {
+      openAlertModal("Authentication Required", "Please log in to place an order")
+      return
+    }
+
+    if (quantity > maxQuantity) {
+      openAlertModal(
+        "Invalid Quantity", 
+        `Maximum available quantity is ${maxQuantity} units`
+      )
+      return
+    }
+
+    if (quantity <= 0) {
+      openAlertModal("Invalid Quantity", "Quantity must be greater than 0")
+      return
+    }
+
+    try {
+      // Use the actual API call from your store
+      await placeClickOrder({
+        group_buy_id: groupBuy.id,
+        quantity: quantity
+      })
+
+      // Close modal and reset quantity
+      closeQuantityModal()
+      setQuantity(1)
+      
+      // Show success message
+      openAlertModal(
+        "Order Placed Successfully", 
+        `Your order for ${quantity} units has been placed!`
+      )
+    } catch (error) {
+      // Error is already handled in the store, but we can show additional feedback
+      openAlertModal(
+        "Order Failed", 
+        "Failed to place order. Please try again."
+      )
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 animate-fade-in">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md animate-bounce-in">
+        <h3 className="text-lg font-semibold text-[#1F2937] mb-4">Place Order</h3>
+
+        <div className="mb-4">
+          <h4 className="font-medium text-[#1F2937]">{groupBuy.products.name}</h4>
+          <p className="text-sm text-gray-600">
+            Price: {formatCurrency(groupBuy.price_per_unit)} per unit
+          </p>
+          <p className="text-sm text-gray-600">
+            Available: {maxQuantity} units
+          </p>
+          <p className="text-sm text-gray-600">
+            Ends: {new Date(groupBuy.end_date).toLocaleDateString()}
+          </p>
         </div>
-    );
-};
 
-export default QuantityModal;
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Quantity (units)"
+            type="number"
+            min="1"
+            max={maxQuantity}
+            value={quantity}
+            onChange={(e) => setQuantity(Number.parseInt(e.target.value) || 1)}
+            required
+          />
+
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-600">Total Amount</p>
+            <p className="text-lg font-semibold text-[#1F2937]">
+              {formatCurrency(totalAmount)}
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={closeQuantityModal}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              isLoading={isLoading}
+              disabled={isLoading || maxQuantity <= 0}
+            >
+              {maxQuantity <= 0 ? 'Sold Out' : 'Place Order'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}

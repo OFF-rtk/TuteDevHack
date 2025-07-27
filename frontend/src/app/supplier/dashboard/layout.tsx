@@ -1,58 +1,102 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStores';
 import { Navbar } from '@/components/layout/Navbar';
-import AlertModal from '@/components/ui/AlertModal';
-import { useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/ui/AlertModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export default function SupplierLayout({ children }: { children: React.ReactNode }) {
   const { 
     currentUser, 
     session,
-    error,
+    alertModal,
+    confirmModal,
+    closeAlertModal,
+    closeConfirmModal,
     fetchMyGroupBuys,
     fetchSupplierAnalytics,
-    fetchMyProducts, // Also fetch products for the "create group buy" page
+    fetchMyProducts,
     logout
   } = useAppStore();
   const router = useRouter();
+  
+  const [isHydrated, setIsHydrated] = useState(false);
 
+  // Handle Zustand hydration
   useEffect(() => {
-    if (!session) {
-      router.push('/');
-    } else {
-      // Fetch all necessary data for the supplier section
-      fetchSupplierAnalytics();
-      fetchMyGroupBuys();
-      fetchMyProducts();
+    const unsub = useAppStore.persist.onHydrate(() => setIsHydrated(true));
+    if (useAppStore.persist.hasHydrated()) {
+      setIsHydrated(true);
     }
-  }, [session, router, fetchSupplierAnalytics, fetchMyGroupBuys, fetchMyProducts]);
+    return () => {
+      unsub();
+    };
+  }, []);
+
+  // Handle authentication and data fetching
+  useEffect(() => {
+    if (isHydrated) {
+      if (!session) {
+        router.push('/');
+      } else if (currentUser?.role === 'VENDOR') {
+        // Redirect vendors to their dashboard
+        router.push('/dashboard');
+      } else if (currentUser?.role === 'SUPPLIER') {
+        // Fetch data for suppliers
+        fetchSupplierAnalytics();
+        fetchMyGroupBuys();
+        fetchMyProducts();
+      }
+    }
+  }, [isHydrated, session, currentUser, router, fetchSupplierAnalytics, fetchMyGroupBuys, fetchMyProducts]);
 
   const handleLogout = async () => {
     await logout();
     router.push('/');
   };
 
-  if (!currentUser) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-50">Loading Supplier...</div>;
+  // Loading state during hydration
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F1E8]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A7C59]"></div>
+      </div>
+    );
   }
-  
-  // Add a role check for extra security
+
+  // Unauthenticated state
+  if (!session || !currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F1E8]">
+        <p className="text-gray-600">Redirecting...</p>
+      </div>
+    );
+  }
+
+  // Wrong role state
   if (currentUser.role !== 'SUPPLIER') {
-     return <div className="flex items-center justify-center min-h-screen bg-gray-50">Access Denied.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F1E8]">
+        <p className="text-gray-600">Redirecting to appropriate dashboard...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-[#F5F1E8]">
       <Navbar 
         user={currentUser} 
         handleLogout={handleLogout} 
       />
-      <main className="flex-grow">
+      
+      <main className="max-w-lg md:max-w-7xl mx-auto px-4 py-6">
         {children}
       </main>
       
-      {error && <AlertModal isOpen={!!error} onClose={() => useAppStore.setState({ error: null })} title="An Error Occurred">{error}</AlertModal>}
+      {/* Global Modals - Using your existing UI components */}
+      <AlertModal />
+      <ConfirmModal />
     </div>
   );
 }

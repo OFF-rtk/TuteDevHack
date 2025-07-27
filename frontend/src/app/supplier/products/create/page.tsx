@@ -1,14 +1,11 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppStore } from '@/stores/appStores';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAppStore } from '@/stores/appStores';
 import { CreateProductDto } from '@/lib/types';
 
 export default function CreateProductPage() {
-  const { createProduct, isLoading } = useAppStore();
+  const { createProduct, isLoading, openAlertModal } = useAppStore();
   const router = useRouter();
 
   // Form state
@@ -18,78 +15,172 @@ export default function CreateProductPage() {
     image_url: '',
     search_keywords: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!formData.name) {
+    if (!formData.name.trim()) {
       setError('Product name is required.');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await createProduct(formData);
-      alert('Success! Your new product has been created.');
-      router.push('/supplier/products'); // Redirect to the products list page
+      openAlertModal('Success', 'Your new product has been created successfully!');
+      router.push('/supplier/products');
     } catch (err: any) {
-      // THE FIX: This will now display any error from the backend
       setError(err.message || 'Failed to create product. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="p-4 sm:p-6 pb-24 bg-gray-50">
-      <Link href="/supplier/products" className="text-orange-600 font-semibold mb-6 flex items-center">&larr; Back to Products</Link>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6" style={{ fontFamily: "'Poppins', sans-serif" }}>Add a New Product</h2>
-      
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-lg space-y-6 max-w-2xl mx-auto">
-        <Input 
-          id="name" 
-          label="Product Name" 
-          type="text" 
-          required 
-          placeholder="e.g., Premium Onions"
-          value={formData.name}
-          onChange={handleInputChange}
-        />
-        <Input 
-          id="description" 
-          label="Description (Optional)" 
-          type="text" 
-          placeholder="e.g., Top grade white onions, handpicked quality"
-          value={formData.description}
-          onChange={handleInputChange}
-        />
-        <Input 
-          id="image_url" 
-          label="Image URL (Optional)" 
-          type="url" 
-          placeholder="https://example.com/image.jpg"
-          value={formData.image_url}
-          onChange={handleInputChange}
-        />
-        <Input 
-          id="search_keywords" 
-          label="Search Keywords (Optional)" 
-          type="text" 
-          placeholder="e.g., onions, safed, pyaz, premium"
-          value={formData.search_keywords}
-          onChange={handleInputChange}
-        />
+    <div className="min-h-screen bg-[#F5F1E8]">
+      <div className="max-w-2xl mx-auto space-y-6 p-6">
+        <div>
+          <h1 className="text-2xl font-poppins font-bold text-[#1F2937] mb-2">
+            Add New Product
+          </h1>
+          <p className="text-[#6B7280]">
+            Create a new product to use in your group buys
+          </p>
+        </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <div className="bg-white rounded-2xl shadow-lg p-8 warm-shadow">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Product Name */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Product Name
+              </label>
+              <input
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="e.g., Premium Fresh Onions"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#4A7C59]"
+                required
+              />
+            </div>
 
-        <Button type="submit" variant="primary" isLoading={isLoading}>
-          Create Product
-        </Button>
-      </form>
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Description (Optional)
+              </label>
+              <textarea
+                name="description"
+                value={formData.description || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., Top grade white onions, handpicked for quality and freshness"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#4A7C59] resize-none"
+                rows={3}
+              />
+            </div>
+
+            {/* Image URL */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Product Image URL (Optional)
+              </label>
+              <input
+                name="image_url"
+                type="url"
+                value={formData.image_url || ''}
+                onChange={handleInputChange}
+                placeholder="https://example.com/product-image.jpg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#4A7C59]"
+              />
+            </div>
+
+            {/* Search Keywords */}
+            <div>
+              <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                Search Keywords (Optional)
+              </label>
+              <input
+                name="search_keywords"
+                type="text"
+                value={formData.search_keywords || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., onions, safed, pyaz, premium, fresh"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A7C59] focus:border-[#4A7C59] transition-colors bg-white text-[#1F2937] placeholder-[#4A7C59]"
+              />
+              <p className="text-xs text-[#4A7C59] mt-1">
+                Separate keywords with commas to help vendors find your product
+              </p>
+            </div>
+
+            {/* Image Preview */}
+            {formData.image_url && (
+              <div>
+                <label className="block text-sm font-medium text-[#1F2937] mb-2">
+                  Image Preview
+                </label>
+                <div className="w-32 h-32 bg-green-50 rounded-lg overflow-hidden border-2 border-dashed border-green-300">
+                  <img
+                    src={formData.image_url}
+                    alt="Product preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  {error}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6">
+              <button
+                type="button" 
+                onClick={() => router.back()} 
+                className="flex-1 py-3 px-4 text-center rounded-lg transition-all duration-200 font-medium text-[#6B7280] hover:text-[#1F2937] hover:bg-gray-100 border border-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit" 
+                disabled={isSubmitting || isLoading}
+                className="flex-1 py-3 px-4 text-center rounded-lg transition-all duration-200 font-medium bg-[#4A7C59] text-white hover:bg-[#3D6B4A] focus:outline-none focus:ring-2 focus:ring-[#4A7C59] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting || isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </div>
+                ) : (
+                  'Create Product'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

@@ -282,4 +282,45 @@ export class OrdersService {
 
     return enrichedOrders;
   }
+
+  async cancelOrder (vendorId: string, orderId: string) {
+    const client = this.supabaseService.getClient();
+
+    const { data: order, error: orderError} = await client
+      .from('orders')
+      .select('id, status, created_at, vendor_id')
+      .eq('id', orderId)
+      .eq('vendor_id', vendorId)
+      .single()
+
+    if(orderError || !order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found or doesn't belong to you.`);
+    }
+
+    if(order.status !== 'PLACED') {
+      throw new BadRequestException('Only orders with PLACED status can be cancelled.');
+    }
+
+    const orderTime = new Date(order.created_at).getTime();
+    const now = Date.now();
+    const thrityMinutes = 30*60*1000;
+
+    if(now - orderTime > thrityMinutes) {
+      throw new BadRequestException('Orders can only be cancelled within 30 minutes of placement.')
+    }
+
+    const { error: updateError } = await client
+      .from('orders')
+      .update({ status: 'CANCELLED' })
+      .eq('id', orderId)
+      .eq('vendor_id', vendorId);
+
+    if (updateError) {
+      throw new InternalServerErrorException('Failed to cancel order.');
+    }
+
+    return {
+      message: 'Order cancelled successfully',
+    };
+  }
 }

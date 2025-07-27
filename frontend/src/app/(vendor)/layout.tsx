@@ -1,16 +1,20 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStores';
 import { Navbar } from '@/components/layout/Navbar';
-import AlertModal from '@/components/ui/AlertModal';
-import { useRouter } from 'next/navigation';
-import { VoiceOrderButton } from '@/components/features/VoiceOrderButton';
+import { AlertModal } from '@/components/ui/AlertModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { QuantityModal } from '@/components/ui/QuantityModal';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { 
     currentUser, 
     session,
-    error,
+    alertModal,
+    confirmModal,
+    closeAlertModal,
+    closeConfirmModal,
     fetchGroupBuys,
     fetchMyOrders,
     logout
@@ -19,6 +23,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   
   const [isHydrated, setIsHydrated] = useState(false);
 
+  // Handle Zustand hydration
   useEffect(() => {
     const unsub = useAppStore.persist.onHydrate(() => setIsHydrated(true));
     if (useAppStore.persist.hasHydrated()) {
@@ -29,50 +34,69 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     };
   }, []);
 
+  // Handle authentication and data fetching
   useEffect(() => {
     if (isHydrated) {
       if (!session) {
         router.push('/');
-      } else {
+      } else if (currentUser?.role === 'SUPPLIER') {
+        // Redirect suppliers to their dashboard
+        router.push('/supplier/dashboard');
+      } else if (currentUser?.role === 'VENDOR') {
+        // Fetch data for vendors
         fetchGroupBuys();
         fetchMyOrders();
       }
     }
-  }, [isHydrated, session, router, fetchGroupBuys, fetchMyOrders]);
+  }, [isHydrated, session, currentUser, router, fetchGroupBuys, fetchMyOrders]);
 
   const handleLogout = async () => {
     await logout();
     router.push('/');
   };
 
+  // Loading state during hydration
   if (!isHydrated) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-50">Initializing Session...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FDF8F0]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B35]"></div>
+      </div>
+    );
   }
 
-  if (!currentUser) {
-     return <div className="flex items-center justify-center min-h-screen bg-gray-50">Redirecting...</div>;
+  // Unauthenticated state
+  if (!session || !currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FDF8F0]">
+        <p className="text-gray-600">Redirecting...</p>
+      </div>
+    );
   }
-  
-  // THE FIX: Add a role check to ensure this layout is only for vendors
+
+  // Wrong role state
   if (currentUser.role !== 'VENDOR') {
-    // You can show an access denied message or redirect them
-    // For now, we'll show a simple loader while the AuthPage redirects them
-    return <div className="flex items-center justify-center min-h-screen bg-gray-50">Incorrect role, redirecting...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FDF8F0]">
+        <p className="text-gray-600">Redirecting to appropriate dashboard...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-[#FDF8F0]">
       <Navbar 
         user={currentUser} 
         handleLogout={handleLogout} 
       />
-      <main className="flex-grow">
+      
+      <main className="max-w-lg md:max-w-7xl mx-auto px-4 py-6">
         {children}
       </main>
       
-      {error && <AlertModal isOpen={!!error} onClose={() => useAppStore.setState({ error: null })} title="An Error Occurred">{error}</AlertModal>}
-      
-      <VoiceOrderButton />
+      {/* Global Modals - Using your existing UI components */}
+      <AlertModal />
+      <ConfirmModal />
+      <QuantityModal />
     </div>
   );
 }
