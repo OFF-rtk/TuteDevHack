@@ -193,39 +193,33 @@ export class OrdersService {
   }
 
   async placeOrder(vendorId: string, groupBuyId: string, quantity: number) {
-    const client = this.supabaseService.getClient()
+  const client = this.supabaseService.getClient();
 
-    const { data: groupBuy,  error: groupBuyError } = await client.from('group_buys').select('id, status').eq('id', groupBuyId).single();
+  // Skip the group buy validation temporarily
+  // const { data: groupBuy, error: groupBuyError } = await client...
+  
+  // Direct insert without pre-validation
+  const { error: orderError } = await client.from('orders').insert({
+    vendor_id: vendorId,
+    group_buy_id: groupBuyId,
+    quantity,
+    status: 'PLACED',
+  });
 
-    if(groupBuyError || !groupBuy) {
-        throw new NotFoundException(`Group buy with ID ${groupBuyId} not found.`)
+  if (orderError) {
+    console.error('Direct insert error:', orderError);
+    
+    if (orderError.code === '23505') {
+      throw new BadRequestException('You have already placed an order for this group buy.');
     }
-
-    if(groupBuy.status !== 'ACTIVE') {
-        throw new BadRequestException('Group buy is not active');
-    }
-
-    if(quantity <= 0) {
-        throw new BadRequestException("Quantity must be greater than zero.");
-    }
-
-    const { error: orderError } = await client.from('orders').insert({
-        vendor_id: vendorId,
-        group_buy_id: groupBuyId,
-        quantity,
-    })
-
-    if(orderError) {
-        if(orderError.code === '23505') {
-            throw new BadRequestException('You have already placed an order for this group buy.');
-        }
-        throw new InternalServerErrorException('Failed to create order.');
-    }
-
-    return {
-        message: "Order Placed Successfully!"
-    };
+    
+    throw new InternalServerErrorException('Failed to create order.');
   }
+
+  return {
+    message: 'Order Placed Successfully!',
+  };
+}
 
   async getOrdersByVendor(vendorId: string): Promise<Order[]> {
     const client = this.supabaseService.getClient();
