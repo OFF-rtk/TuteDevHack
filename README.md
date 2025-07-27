@@ -6,12 +6,14 @@ Welcome to the team! This guide will help you get started, even if you're new to
 
 ## 📁 Project Structure
 
+```
 /hackathon-project
 ├── frontend/ → Next.js + TypeScript + TailwindCSS(Frontend)
 ├── backend/ → Node.js + Express.js (Backend)
 ├── ai/ → Python for AI/ML (Inference, Models, etc.)
 ├── README.md → This file!
 └── .gitignore → Files/folders to ignore in Git
+```
 
 ---
 
@@ -21,11 +23,11 @@ We follow a Git branching model where each team member works in their own featur
 
 | Branch Name          | Purpose                    | Assigned To            |
 |----------------------|----------------------------|------------------------|
-| `feature/frontendH`  | Frontend Dev 1 features    | Frontend Teammate 1    |
-| `feature/frontendS`  | Frontend Dev 2 features    | Frontend Teammate 2    |
+| `feature/frontendH`  | Frontend Dev H features    | Frontend Teammate H    |
+| `feature/frontendS`  | Frontend Dev S features    | Frontend Teammate S    |
 | `feature/backendP`   | Backend APIs and logic     | Backend Teammate       |
-| `feature/aiR`        | AI/ML development          | AI Engineer (You)      |
-| `develop`            | Merged & tested features   | You (Integrator)       |
+| `feature/aiR`        | AI/ML development          | AI Engineer            |
+| `develop`            | Merged & tested features   | Integrator             |
 | `main`               | Final release-ready code   | Everyone!              |
 
 ✅ Branches are only merged into `develop` first → then into `main` once everything is tested.
@@ -52,7 +54,7 @@ cd TuteDevHack
 ```bash
 
 git fetch
-git checkout <your-branch-name>
+git checkout feature/<your-branch-name>
 
 ```
 (Replace `<your-branch-name>` with your assigned one)
@@ -72,7 +74,7 @@ git checkout <your-branch-name>
 
     git add .
     git commit -m "🛠️ Describe what you did"
-    git push origin <your-branch-name>
+    git push origin feature/<your-branch-name>
 
     ```
 
@@ -123,6 +125,27 @@ When you’re done working and want to share your updates:
 Feel stuck or confused? Ask the team lead or message in the group chat — we’re here to help each other! No judgment — we all started somewhere. 🎯
 
 ---
+
+## Themes
+
+| 🧱 Component       | Background                             | Hover / Focus Styles                                  | Text Color                         | Variants                  | Type / Tag     | Effects / Animations                                        | Utility Classes                                                                 |
+|--------------------|----------------------------------------|--------------------------------------------------------|-------------------------------------|----------------------------|----------------|----------------------------------------------------------------|----------------------------------------------------------------------------------|
+| **Button (Primary)** | `bg-[var(--color-accent)]`            | `hover:bg-indigo-700`                                  | `text-white`                        | `primary`                 | `<button>`     | `transition`, `hover:-translate-y-1`, `duration-150`         | `px-5 py-2 rounded-[var(--radius)] font-semibold`                               |
+| **Button (Light)**   | `bg-gray-200`                         | `hover:bg-gray-300`                                    | `text-gray-700`                     | `light`                   | `<button>`     | `transition`                                                 | `px-4 py-2 rounded-[var(--radius)]`                                             |
+| **Button (Outline)** | `bg-transparent border border-gray-300` | `hover:border-[var(--color-accent)]`                 | `text-[var(--color-accent)]`        | `outline`                 | `<button>`     | `transition`, `hover:shadow-sm`                               | `px-5 py-2 rounded-[var(--radius)] font-medium`                                 |
+| **Card**             | `bg-[var(--surface)]`                | `hover:shadow-lg`                                      | `text-[var(--color-foreground)]`    | `default`, `highlight`    | `<div>`        | `transition`, `duration-300`, `shadow-sm`                    | `rounded-[var(--radius)] p-6 shadow-sm`                                         |
+| **Card (Glass)**     | `bg-white/70 backdrop-blur`           | `hover:shadow-lg`                                      | `text-[var(--color-foreground)]`    | `glass`                   | `<div>`        | `transition`, `duration-300`, `backdrop-blur`                | `rounded-[var(--radius)] p-8 bg-white/70 backdrop-blur-md shadow`               |
+| **Heading (h1-h6)**  | *inherit*                             | —                                                      | `text-[var(--color-foreground)]`    | —                          | `<h1>` – `<h6>` | —                                                              | `font-bold text-2xl xl:text-4xl mb-2`                                           |
+| **Paragraph**        | *inherit*                             | —                                                      | `text-[var(--color-muted)]`         | —                          | `<p>`          | —                                                              | `text-base leading-relaxed`                                                    |
+| **Input**            | `bg-[var(--surface)]`                | `focus:ring-[var(--color-accent)] focus:outline-none` | `text-[var(--color-foreground)]`    | `default`                 | `<input>`      | `transition`, `ring`, `duration-150`                        | `rounded-[var(--radius)] px-3 py-2 border border-gray-300 w-full`              |
+| **Textarea**         | Same as Input                         | Same as Input                                           | Same as Input                        | —                          | `<textarea>`   | Same                                                         | Same                                                                             |
+| **Select**           | Same as Input                         | Same as Input                                           | Same as Input                        | —                          | `<select>`     | Same                                                         | Same                                                                             |
+| **Badge**            | `bg-[var(--color-accent2)]`           | `hover:bg-[#ff8c75]`                                   | `text-white`                        | `default`, `pill`, `tag`  | `<span>`       | `transition`, `duration-150`                                 | `inline-block px-3 py-1 rounded-2xl text-xs font-medium`                        |
+| **Alert**            | `bg-[var(--color-accent2)]/20`        | —                                                      | `text-[var(--color-text)]`          | `warning`, `info`, `error` | `<div>`        | `animate-pulse`, `border-l-4 border-[var(--color-accent2)]` | `rounded-lg p-4`                                                                 |
+| **Link**             | `transparent`                         | `hover:text-[var(--color-accent)] underline`          | `text-[var(--color-foreground)]`    | `primary`, `inline`, `menu`| `<a>`          | `transition`, `underline-offset-4`                         | `font-medium transition duration-150`                                           |
+
+---
+
 
 🏁 **Let’s ship something awesome!** 🧠🚀
 
