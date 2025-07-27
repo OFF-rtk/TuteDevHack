@@ -1,103 +1,120 @@
-import Image from "next/image";
+'use client';
+import React, { useState } from 'react';
+import { useAppStore } from '@/stores/appStores';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import Input from '@/components/ui/Input';
+import  Button  from '@/components/ui/Button';
+import  Logo  from '@/components/ui/Logo';
+import { initialDummyData } from '@/lib/data';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
+  const setCurrentUser = useAppStore((state) => state.setCurrentUser);
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // State for form fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [locality, setLocality] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleAuth = () => {
+    // In a real app, you would use the state variables (email, password)
+    // to make an API call.
+    const user = initialDummyData.users['vendor_user_1']; 
+    setCurrentUser(user);
+    if (user.role === 'VENDOR') {
+      router.push('/dashboard');
+    }
+    // Add supplier logic here if needed
+  };
+
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FDF8F0] p-4">
+      <div className="text-center mb-6">
+        <img src="http://googleusercontent.com/file_content/3" alt="Marketplace Illustration" className="w-64 mx-auto mb-4" />
+        <Logo className="justify-center text-2xl" />
+        <p className="text-zinc-600 mt-1">India's Digital Committee for Local Buying</p>
+      </div>
+      <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md mx-auto">
+        <div className="flex border-b mb-6">
+          <button onClick={() => setAuthMode('LOGIN')} className={cn('w-1/2 py-3 font-semibold text-center transition-colors duration-300', authMode === 'LOGIN' ? 'border-b-2 border-orange-500 text-orange-600' : 'text-gray-500')}>Login</button>
+          <button onClick={() => setAuthMode('SIGNUP')} className={cn('w-1/2 py-3 font-semibold text-center transition-colors duration-300', authMode === 'SIGNUP' ? 'border-b-2 border-orange-500 text-orange-600' : 'text-gray-500')}>Sign Up</button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        {authMode === 'LOGIN' ? (
+          <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
+            <Input 
+              id="login-email" 
+              label="Email" 
+              type="email" 
+              required 
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input 
+              id="login-password" 
+              label="Password" 
+              type="password" 
+              required 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button type="submit" variant="primary">Login</Button>
+          </form>
+        ) : (
+          <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
+            <Input 
+              id="signup-fullname" 
+              label="Full Name (Optional)" 
+              type="text" 
+              placeholder="Raju's Chaat Stall"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+            <Input 
+              id="signup-email" 
+              label="Email" 
+              type="email" 
+              required 
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input 
+              id="signup-locality" 
+              label="Area / Locality" 
+              type="text" 
+              required 
+              placeholder="Mhow Gaon"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+            />
+            <Input 
+              id="signup-password" 
+              label="Password" 
+              type="password" 
+              required 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Input 
+              id="signup-confirm-password" 
+              label="Confirm Password" 
+              type="password" 
+              required 
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button type="submit" variant="primary">Create Account</Button>
+          </form>
+        )}
+      </div>
+    </main>
   );
 }

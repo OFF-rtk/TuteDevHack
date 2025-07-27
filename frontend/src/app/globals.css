@@ -1,27 +1,56 @@
-@import "tailwindcss"; /* ✅ The ONLY import you need in Tailwind v4 */
+@import "tailwindcss";
 
-/* Your CSS variables and theme overrides */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base Colors */
+  --background: #F6F7FA;             /* Calm light background */
+  --foreground: #23224C;             /* Deep navy for text */
+  --muted: #8A8E98;                  /* Soft gray for subtext */
+  --surface: #FFFFFF;                /* Cards, panels, inputs */
+
+  /* Accent Colors */
+  --color-accent: #7F5AF0;           /* Creative purple-blue tone */
+  --color-accent2: #FF9671;          /* Optional warm/coral accent */
+  --color-action: #2EC4B6;           /* Optional success/freshness accent */
+
+  /* Font Stack */
+  --font-sans: 'Inter', 'Geist', 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Fira Mono', ui-monospace, monospace;
+
+  /* Border Radius */
+  --radius: 0.75rem;
 }
 
+/* Tailwind v4 inline theme extension */
 @theme inline {
+  /* Connect variables to utility use */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-accent: var(--color-accent);
+  --color-accent2: var(--color-accent2);
+  --radius: var(--radius); /* for use w/ rounded-[var(--radius)] */
 }
 
+/* Dark Mode Responsive Theme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0A0A0A;           /* Soft black background */
+    --foreground: #F6F7FA;           /* Light foreground text */
+    --muted: #A8AAB0;                /* Slightly brighter muted */
+    --surface: #111111;
+
+    --color-accent: #9C7BFA;         /* Softer purple-blue in dark mode */
+    --color-accent2: #FFB89C;        /* Warm highlight in dark mode */
+    --color-action: #47D7CB;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans, Arial, sans-serif);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
