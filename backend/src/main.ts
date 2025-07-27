@@ -7,18 +7,17 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'https://localhost:3000',
-      'https://your-app-name.vercel.app',
-      'https://*.vercel.app',
+      'http://localhost:3000',      // ✅ HTTP for local development
+      'https://*.vercel.app',       // ✅ HTTPS for all Vercel deployments
     ],
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(new ValidationPipe());
 
-  const port = process.env.PORT || 3001
+  const port = process.env.PORT || 3001;
   await app.listen(port, '0.0.0.0');
 
-  console.log(`Mandinow Backend running on port ${port}`);
+  console.log(`🚀 MandiNow Backend running on port ${port}`);
 }
 bootstrap();
