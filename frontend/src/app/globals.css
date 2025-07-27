@@ -1,56 +1,244 @@
 @import "tailwindcss";
 
 :root {
-  /* Base Colors */
-  --background: #F6F7FA;             /* Calm light background */
-  --foreground: #23224C;             /* Deep navy for text */
-  --muted: #8A8E98;                  /* Soft gray for subtext */
-  --surface: #FFFFFF;                /* Cards, panels, inputs */
-
-  /* Accent Colors */
-  --color-accent: #7F5AF0;           /* Creative purple-blue tone */
-  --color-accent2: #FF9671;          /* Optional warm/coral accent */
-  --color-action: #2EC4B6;           /* Optional success/freshness accent */
-
-  /* Font Stack */
-  --font-sans: 'Inter', 'Geist', 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  /* HSL Color Values for Tailwind v4 */
+  --background: 40 33% 94%;           /* Cream background (#f5f1e8) */
+  --foreground: 214 20% 14%;          /* Dark text (#1f2937) */
+  --muted: 220 9% 46%;                /* Warm gray (#6b7280) */
+  --surface: 0 0% 100%;               /* White surface */
+  
+  /* Card colors */
+  --card: 0 0% 100%;
+  --card-foreground: 214 20% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 214 20% 14%;
+  
+  /* Primary colors */
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  
+  /* Secondary colors */
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  /* Accent colors */
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  
+  /* Destructive colors */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  
+  /* Border and input colors */
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  
+  /* Custom MandiNow Colors (converted to HSL) */
+  --warm-orange: 13 100% 60%;         /* #ff6b35 */
+  --deep-green: 98 67% 11%;           /* #2d5016 */
+  --accent-green: 143 29% 40%;        /* #4a7c59 */
+  --cream: 40 33% 94%;                /* #F5F1E8 */
+  --cream-light: 40 50% 96%;          /* Lighter cream for gradient */
+  --warm-gray: 220 9% 46%;            /* #6B7280 */
+  
+  /* Creative accent colors from your original */
+  --color-accent: 253 83% 68%;        /* #7F5AF0 */
+  --color-accent2: 17 100% 72%;       /* #FF9671 */
+  --color-action: 174 65% 47%;        /* #2EC4B6 */
+  
+  /* Fonts */
+  --font-sans: 'Be Vietnam Pro', 'Inter', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: 'Poppins', var(--font-sans);
   --font-mono: 'Fira Mono', ui-monospace, monospace;
-
-  /* Border Radius */
+  
+  /* Border radius */
   --radius: 0.75rem;
 }
 
-/* Tailwind v4 inline theme extension */
-@theme inline {
-  /* Connect variables to utility use */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-
-  --color-accent: var(--color-accent);
-  --color-accent2: var(--color-accent2);
-  --radius: var(--radius); /* for use w/ rounded-[var(--radius)] */
-}
-
-/* Dark Mode Responsive Theme */
+/* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0A0A0A;           /* Soft black background */
-    --foreground: #F6F7FA;           /* Light foreground text */
-    --muted: #A8AAB0;                /* Slightly brighter muted */
-    --surface: #111111;
-
-    --color-accent: #9C7BFA;         /* Softer purple-blue in dark mode */
-    --color-accent2: #FFB89C;        /* Warm highlight in dark mode */
-    --color-action: #47D7CB;
+    --background: 0 0% 4%;              /* Soft black (#0A0A0A) */
+    --foreground: 40 33% 96%;           /* Light foreground */
+    --muted: 220 8% 67%;                /* Brighter muted for dark */
+    --surface: 0 0% 7%;                 /* Dark surface (#111111) */
+    
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    
+    /* Adjusted accent colors for dark mode */
+    --color-accent: 253 73% 78%;        /* Softer purple-blue */
+    --color-accent2: 17 100% 82%;       /* Warm highlight */
+    --color-action: 174 55% 62%;        /* Brighter action color */
   }
 }
 
+/* Tailwind v4 theme extension - ALL CONFIG MOVED HERE */
+@theme {
+  /* Font families from tailwind.config.ts */
+  --font-family-poppins: var(--font-poppins);
+  --font-family-be-vietnam-pro: var(--font-sans);
+  --font-family-sans: var(--font-sans);
+  --font-family-mono: var(--font-mono);
+  
+  /* Color system - shadcn/ui colors */
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  /* Custom MandiNow colors from tailwind.config.ts */
+  --color-cream: hsl(var(--cream));
+  --color-warm-orange: hsl(var(--warm-orange));
+  --color-deep-green: hsl(var(--deep-green));
+  --color-accent-green: hsl(var(--accent-green));
+  --color-warm-gray: hsl(var(--warm-gray));
+  
+  /* Creative accent colors */
+  --color-creative-accent: hsl(var(--color-accent));
+  --color-creative-accent2: hsl(var(--color-accent2));
+  --color-action: hsl(var(--color-action));
+  
+  /* Border radius from tailwind.config.ts */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  /* Animations from tailwind.config.ts */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.6s ease-out;
+  --animate-bounce-in: bounceIn 0.8s ease-out;
+}
+
+/* Base styles */
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: var(--font-sans);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* All keyframes from tailwind.config.ts */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes bounceIn {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.3); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.05); 
+  }
+  70% { 
+    transform: scale(0.9); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+/* Utility classes - equivalent to your tailwind.config.ts animations */
+@utility animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+@utility animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@utility animate-slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+@utility animate-bounce-in {
+  animation: bounceIn 0.8s ease-out;
+}
+
+/* UPDATED: More accurate hero-gradient to match the UI */
+@utility hero-gradient {
+  background: linear-gradient(135deg, #f5f1e8 0%, #f0ebe3 100%);
+}
+
+@utility card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@utility warm-shadow {
+  box-shadow: 0 10px 25px -5px hsla(var(--warm-orange) / 0.1), 
+              0 4px 6px -2px hsla(var(--warm-orange) / 0.05);
 }
