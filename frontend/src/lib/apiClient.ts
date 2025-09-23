@@ -24,24 +24,22 @@ apiClient.interceptors.request.use(
 );
 
 // Response interceptor - handle common errors
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
+// Request interceptor - add auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    // Add client-side guard
+    if (typeof window !== 'undefined') {
+      const session = useAppStore.getState().session;
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+      }
+    }
+    return config;
   },
   (error) => {
-    // Handle 401 errors (unauthorized) - logout user
-    if (error.response?.status === 401) {
-      const { logout } = useAppStore.getState();
-      logout();
-    }
-    
-    // Handle network errors
-    if (!error.response) {
-      console.error('Network error:', error.message);
-    }
-    
     return Promise.reject(error);
   }
 );
+
 
 export default apiClient;
